@@ -137,6 +137,9 @@ system_prompt: |
   4. **后期配合**：说明哪些视觉效果需要在后期补充（如"匹配剪辑的精确对点可能需要后期微调""荧光灯频闪效果可在后期添加"）
   5. **分镜绘制建议**：为手绘分镜师提供绘制优先级和简化建议（如"优先绘制S1和S3，S2可用文字分镜替代""构图母题的框架元素必须精确绘制"）
 
+  ## 背景知识（由 RAG 系统注入，若无注入则忽略此段）
+  {{rag_context}}
+
   ## 用户输入
   用户的一句话创意：
   {{user_idea}}
@@ -148,9 +151,48 @@ runtime:
   max_tokens: 8000
   stream: false
 
+rag_config:
+  enabled: false
+  injection_position: before_user_idea
+  injection_format: |
+    以下是与用户创意相关的镜头与空间参考知识，你必须严格基于这些信息进行分镜设计，不得编造与以下内容矛盾的事实细节。你可以在设计中自然引用这些知识，但不需要逐条复述：
+    ---
+    {chunks}
+    ---
+  max_chunks: 5
+  chunk_max_tokens: 500
+  query_generation:
+    method: llm_extract
+    prompt: |
+      从以下故事创意中提取2-3个检索关键词，用于在镜头与空间知识库中查找相关背景资料。
+      关键词应侧重：标志性景物构图、街巷空间关系、建筑纵深、地域光线特征、经典电影镜头参考。
+      只输出关键词，用逗号分隔，不要解释。
+      故事创意：{user_idea}
+    fallback_keywords: []
+  query_templates:
+    - focus: 空间与构图
+      template: "{关键词} 街巷空间 建筑纵深 标志性构图 透视关系"
+    - focus: 光线与氛围
+      template: "{关键词} 自然光线特征 天气氛围 季节光影"
+    - focus: 镜头参考
+      template: "{关键词} 经典电影镜头 运镜方式 构图手法 空间调度"
+    - focus: 地域特征
+      template: "{关键词} 地标建筑 街道尺度 空间节奏 视觉节奏"
+  knowledge_base:
+    type: vector
+    embedding_model: text-embedding-3-small
+    connector: langchain
+    collection: culture_knowledge_base
+    similarity_threshold: 0.7
+  output_compatibility:
+    chunk_format: "【{source}】{content}"
+    deduplicate: true
+    max_total_tokens: 2500
+
 extensions:
   rag_support: true
-  rag_description: "未来可在 user_idea 前注入检索到的经典电影分镜分析、特定导演的镜头语言研究、或运镜技术参考资料"
+  rag_version: "1.1"
+  rag_description: "支持 RAG 知识注入。启用后，系统在调用 LLM 前自动检索知识库，将空间构图、光线氛围、经典镜头参考等知识注入 system_prompt，压制模型幻觉，提升分镜设计的空间准确性和镜头专业性"
   tool_use: false
   image_generation: true
   image_generation_description: "未来可接入图像生成模型，将每个镜头的文字描述自动转化为分镜画面草图"
