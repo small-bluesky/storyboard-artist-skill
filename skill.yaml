@@ -1,28 +1,33 @@
 name: storyboard-artist
-version: 1.0.0
+version: 1.1.0
 description: 将用户的一句话故事创意转化为专业分镜脚本，包含分镜总纲、场次分镜表、运镜节奏、光影色调、构图母题、转场设计及制作提示，可直接用于动态分镜绘制和拍摄筹备。
 author: storyboard-artist-skill
 tags: [storyboard, shot-design, cinematography, pre-visualization, prompt-only]
 language: zh-CN
 model_preference:
   primary:
-    provider: deepseek
-    model: deepseek-chat
-    api_base: https://api.deepseek.com/v1
-    reason: "性价比最高，镜头语言描述精准，中文表达自然，API 国内直连无需代理，价格仅为 GPT-4o 的 1/30"
+    provider: siliconflow
+    model: deepseek-ai/DeepSeek-V3
+    api_base: https://api.siliconflow.cn/v1
+    reason: "性价比最高，镜头语言描述精准，中文表达自然，API 国内直连无需代理，新用户赠送额度"
   alternatives:
+    - provider: qianwen
+      model: qwen3.6-plus
+      api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+      reason: "千问云旗舰统一多模态模型，支持视频理解+图像分析，1M上下文，分镜设计首选"
+    - provider: deepseek
+      model: deepseek-chat
+      api_base: https://api.deepseek.com/v1
+      reason: "DeepSeek官方直连，中文写作质量高，价格低廉"
     - provider: openai
       model: gpt-4o
       api_base: https://api.openai.com/v1
       reason: "结构化输出最可靠，镜头编号和格式最稳定，适合预算充足的生产环境"
-    - provider: siliconflow
-      model: deepseek-ai/DeepSeek-V3
-      api_base: https://api.siliconflow.cn/v1
-      reason: "国内最便捷接入，支持多模型切换，新用户赠送额度"
-    - provider: zhipu
-      model: glm-4-plus
-      api_base: https://open.bigmodel.cn/api/paas/v4
-      reason: "中文理解力强，国内直连，适合需要中文文化语境的项目"
+  vision:
+    provider: qianwen
+    model: qwen3.6-plus
+    api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+    reason: "千问云视觉理解，支持视频关键帧分析和参考图理解，辅助分镜绘制"
 
 input:
   variable: user_idea
